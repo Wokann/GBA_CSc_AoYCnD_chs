@@ -15,5 +15,7 @@
 
 3.点击`build.bat`即可自动生成插入了汉字字库的rom `CSc_AoYCnD_chs.gba`
 
+data文件夹内附带了一份测试汉化文本。
+
 # credit
 armips 作者：Kingcom
