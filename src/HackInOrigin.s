@@ -1,5 +1,5 @@
-.org UnlockCharmapLimit
-    mov r6,0
+;.org UnlockCharmapLimit
+;    mov r6,0
 /* 
 E0 26 movs r6,0xe0 ->
 00 26 movs r6,0
@@ -11,8 +11,14 @@ E0 26 movs r6,0xe0 ->
 34 7D 0A 08->
 00 00 00 09
 */
-
+/* 
 .org ExpandChineseFontJump
     ldr r0,=ExpandChineseFontAddress
     mov pc,r0
+.pool
+*/
+
+.org 0x08009F3C
+    ldr R2,=ExpandChineseFontAddress
+    mov pc,R2
 .pool

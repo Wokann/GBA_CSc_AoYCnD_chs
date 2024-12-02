@@ -1,4 +1,6 @@
 .org ExpandChineseFontAddress
+ .importobj ".\build\RenderText.o"
+/* 
 CalculateCharmap:
     ldrh r2,[r7,0]         ;r2 = *r7(*v4)  ;文本编码
     lsr r0,r2,8           ;r0 = hi(r2)
@@ -52,3 +54,4 @@ End:
     ldr r0,=ExpandChineseFontBack
     mov pc,r0
 .pool
+*/
