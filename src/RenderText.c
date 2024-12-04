@@ -36,7 +36,7 @@ struct FontTileInfo
 {
     u16 unknown1;           //+0
     u16 charCounts;         //+2
-    u32 *AddressOfText;     //+4
+    u32 *AddressOfCopyText; //+4
     u32 *VramBase;          //+8
     u32 *Wram2;             //+0xC
     u16 TileCounts;         //+0x10
@@ -48,7 +48,7 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
     u8 IsChar;
     u16 *ptrOfCurChar;
     u16 curChar,charCounts;
-    u32 dest,v6;
+    u32 dest,i;
 
     if ( a1->charCounts ) 
     {
@@ -57,9 +57,98 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
         {
             a1->IsChar = IsChar | 1; 
             charCounts = a1->charCounts;
-            ptrOfCurChar = (u16 *)((u32)a1->AddressOfText + (2 * charCounts - 2));
-            dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * charCounts - 2 + 1));
-            v6 = 0;
+            ptrOfCurChar = (u16 *)((u32)a1->AddressOfCopyText + (2 * (charCounts - 1)));
+            dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * (charCounts - 1) + 1));
+            i = 0;
+            
+            if ( a1->charCounts ) 
+            {
+                do 
+                {
+                    curChar = *ptrOfCurChar;
+                    if (curChar) 
+                    {
+                        //汉字识别逻辑
+                        u8 hi = curChar >> 8;
+                        u8 lo = curChar & 0xFF;
+                        if ((hi >= 0x01 && hi <= 0x0F && hi != 0x02 && hi != 0x03 && lo != 0x00)
+                        ||  (hi >= 0x40 && hi <= 0x4F && hi != 0x42 && hi != 0x43 && lo != 0x00))
+                        {
+                            u32 NewOffesetOfFont = 0x09000000;
+                            u32 IndexOfFontGfx;
+                            if (hi == 1)
+                                IndexOfFontGfx = lo -1;
+                            else if (hi >= 4 && hi <= 0xF)
+                                IndexOfFontGfx = ((hi - 3) * 255) + lo -1;
+                            else if (hi >= 0x40 && hi <= 0x41)
+                                IndexOfFontGfx = ((hi - 0x33) * 255) + lo -1;
+                            else if (hi >= 0x44 && hi <= 0x4F)
+                                IndexOfFontGfx = ((hi - 0x35) * 255) + lo -1;
+
+                            *(u32 *) 0x40000D4 = NewOffesetOfFont + 0x40 * IndexOfFontGfx;
+                            *(u32 *) 0x40000D8 = dest;
+                            *(u32 *) 0x40000DC = 0x80000020;
+                            dest += 0x40;
+                        }
+                        else
+                        {
+                            u32 v8 = (u16)(curChar & 0xE00) >> 9;
+                            u32 baseOffesetOfFont = *(u32 *)(0x848E92C + v8); //PtrOfAddOfFontGfx
+                            u16 *IndexOfFontGfx_Origin = *(u16 **)(4 * (curChar & 0x1FF) + *(u32 *)(0x848E930 + v8));//PtrOfAddOfFontIndex
+                            
+                            if ( *(u16 *)(0x848E934 + v8) )//PtrOfAddOfAddOfFontIndex
+                            {
+                                *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[1];
+                                *(u32 *) 0x40000D8 = dest;
+                                *(u32 *) 0x40000DC = 0x80000010;
+                                *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[3];
+                                *(u32 *) 0x40000D8 = dest + 0x20;
+                                *(u32 *) 0x40000DC = 0x80000010;
+                                *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[0];
+                                *(u32 *) 0x40000D8 = dest + 0x40;
+                                *(u32 *) 0x40000DC = 0x80000010;
+                                *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[2];
+                                *(u32 *) 0x40000D8 = dest + 0x60;
+                                *(u32 *) 0x40000DC = 0x80000010;
+                                dest += 0x80;
+                            } 
+                            else 
+                            {   
+                                *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x40 * IndexOfFontGfx_Origin[0];
+                                *(u32 *) 0x40000D8 = dest;
+                                *(u32 *) 0x40000DC = 0x80000020;
+                                dest += 0x40;
+                            }
+                        }
+                    }
+                    --ptrOfCurChar;
+                } while (i++ < a1->charCounts);
+            }
+        }
+    }
+    return;
+}
+
+/*
+void RenderText_08009F3C(struct FontTileInfo *a1) 
+{
+    u8 IsChar;
+    u16 *ptrOfCurChar;
+    u16 curChar,charCounts;
+    u32 dest,i;
+
+    if ( a1->charCounts ) 
+    {
+        IsChar = a1->IsChar;
+        if ( (IsChar & 1) == 0 ) 
+        {
+            a1->IsChar = IsChar | 1; 
+            charCounts = a1->charCounts;
+            ptrOfCurChar = (u16 *)((u32)a1->AddressOfCopyText + (2 * (charCounts - 1)));
+            dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * (charCounts - 1) + 1));
+            //从0x06008000起，计算当前要写入的字数，每个字占2个0x20 tile, 0x037F减去占用的tile数量 1、3、5、……
+            //即该字对应的tile内存存放地址
+            i = 0;
             
             if ( a1->charCounts ) 
             {
@@ -68,12 +157,11 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
                     curChar = *ptrOfCurChar;
                     if (curChar) 
                     {
-                        u32 v8 = (u16)(curChar & 0x0) >> 9;
-                        //原程序u32 v8 = (u16)(curChar & 0xE00) >> 9;
-                        u32 baseOffesetOfFont = *(u32 *)(0x848E92C + v8); 
-                        u16 *IndexOfFontGfx_Origin = *(u16 **)(4 * (curChar & 0x1FF) + *(u32 *)(0x848E930 + v8));
+                        u32 v8 = (u16)(curChar & 0xE00) >> 9;
+                        u32 baseOffesetOfFont = *(u32 *)(0x848E92C + v8); //PtrOfAddOfFontGfx
+                        u16 *IndexOfFontGfx_Origin = *(u16 **)(4 * (curChar & 0x1FF) + *(u32 *)(0x848E930 + v8));//PtrOfAddOfFontIndex
                         
-                        if ( *(u16 *)(0x848E934 + v8) ) 
+                        if ( *(u16 *)(0x848E934 + v8) )//PtrOfAddOfAddOfFontIndex
                         {
                             *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[1];
                             *(u32 *) 0x40000D8 = dest;
@@ -91,38 +179,19 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
                         } 
                         else 
                         {   
-                            //汉字识别逻辑
-                            u32 IndexOfFontGfx;
-                            u8 hi = curChar >> 8;
-                            u8 lo = curChar & 0xFF;
-                            if ((hi >= 0x00 && hi <= 0x0F && hi != 0x02 && hi != 0x03 && lo != 0x00)
-                            ||  (hi >= 0x40 && hi <= 0x4F && hi != 0x42 && hi != 0x43 && lo != 0x00))
-                            {
-                                if (hi >= 0 && hi <= 1)
-                                    IndexOfFontGfx = curChar;
-                                else if (hi >= 4 && hi <= 0xF)
-                                    IndexOfFontGfx = ((hi - 2) * 255) + lo + 1;
-                                else if (hi >= 0x40 && hi <= 0x41)
-                                    IndexOfFontGfx = ((hi - 0x32) * 255) + lo + 1;
-                                else if (hi >= 0x44 && hi <= 0x4F)
-                                    IndexOfFontGfx = ((hi - 0x34) * 255) + lo + 1;
-                            }
-                            else
-                                IndexOfFontGfx = IndexOfFontGfx_Origin[0];
-                            
-                            //原程序*(u32 *) 0x40000D4 = baseOffesetOfFont + 0x40 * IndexOfFontGfx_Origin[0];
-                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x40 * IndexOfFontGfx;
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x40 * IndexOfFontGfx_Origin[0];
                             *(u32 *) 0x40000D8 = dest;
                             *(u32 *) 0x40000DC = 0x80000020;
                             dest += 0x40;
                         }
                     }
                     --ptrOfCurChar;
-                    v11 = (v6 << 16) + 0x10000;
-                    v6 = (u32)(v11 >> 16);
+                    v11 = (i << 16) + 0x10000;
+                    i = (u32)(v11 >> 16);  
                 } while ((v11 >> 16) < a1->charCounts);
             }
         }
     }
     return;
 }
+*/

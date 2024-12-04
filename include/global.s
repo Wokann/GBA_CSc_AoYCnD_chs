@@ -6,5 +6,5 @@ FontGlyphAddress            equ 0x0848E92C
 
 ;HackFunctionAddress
 ExpandChineseFontAddress    equ 0x08FD0000
-JPFontNewAddress            equ 0x09000000
-CHSFontAddress              equ 0x09004000
+;JPFontNewAddress            equ 0x09000000
+CHSFontAddress              equ 0x09000000
