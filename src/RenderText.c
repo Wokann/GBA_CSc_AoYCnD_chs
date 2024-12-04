@@ -32,25 +32,36 @@ typedef u8  bool8;
 typedef u16 bool16;
 typedef u32 bool32;
 
-void RenderText_08009F3C(u32 a1) 
+struct FontTileInfo
+{
+    u16 unknown1;           //+0
+    u16 charCounts;         //+2
+    u32 *AddressOfText;     //+4
+    u32 *VramBase;          //+8
+    u32 *Wram2;             //+0xC
+    u16 TileCounts;         //+0x10
+    u8 IsChar;              //+0x12
+};
+
+void RenderText_08009F3C(struct FontTileInfo *a1) 
 {
     u8 IsChar;
     u16 *ptrOfCurChar;
     u16 curChar,charCounts;
     u32 dest,v6;
 
-    if ( *(u16 *)(a1 + 2) ) 
+    if ( a1->charCounts ) 
     {
-        IsChar = *(u8 *)(a1 + 0x12);
+        IsChar = a1->IsChar;
         if ( (IsChar & 1) == 0 ) 
         {
-            *(u8 *)(a1 + 0x12) = IsChar | 1; 
-            charCounts = *(u16 *)(a1 + 2);
-            ptrOfCurChar = (u16 *)(*(u32 *)(a1 + 4) + (2 * charCounts - 2));
-            dest = *(u32 *)(a1 + 8) + 0x20 * (*(u16 *)(a1 + 0x10) - (2 * charCounts - 2 + 1));
+            a1->IsChar = IsChar | 1; 
+            charCounts = a1->charCounts;
+            ptrOfCurChar = (u16 *)((u32)a1->AddressOfText + (2 * charCounts - 2));
+            dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * charCounts - 2 + 1));
             v6 = 0;
             
-            if ( *(u16 *)(a1 + 2) ) 
+            if ( a1->charCounts ) 
             {
                 u32 v11;
                 do {
@@ -109,7 +120,7 @@ void RenderText_08009F3C(u32 a1)
                     --ptrOfCurChar;
                     v11 = (v6 << 16) + 0x10000;
                     v6 = (u32)(v11 >> 16);
-                } while ((v11 >> 16) < *(u16 *)(a1 + 2));
+                } while ((v11 >> 16) < a1->charCounts);
             }
         }
     }
