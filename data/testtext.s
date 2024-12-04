@@ -2,8 +2,33 @@
 ;故不使用.str，因其在已设置终止符时会调用，不设置时也会默认为00填充
 
 .org 0x080C67EE
-.strn "蜡笔小新呼风唤雨电影乐园大冒险！{End_16}"
+Dialog_001:
+Text_001_001: .strn "在新之助他们居住的春日部！{End_16}"
+Text_001_002: .strn "新开设了一个{End_06}"
+Text_001_003: .strn "春日部电影乐园{End_07}"
+Text_001_004: .strn "啊蹭瞪府厚街阑漫陪热谁宛姓雍正冂厶薇{End_21}"
+Text_001_005: .strn "在那里，通过虚拟电影院机器{End_16}"
+Text_001_006: .strn "人们可以体验电影中的世界！{End_16}"
+Text_001_007: .strn "圄阗婢椋腈钏癜篌鲐{End_09}"
+Text_001_008: .strn "测试八{End_03}"
+Text_001_009: .strn "测试九{End_03}"
+Text_001_010: .strn "测试十{End_03}"
 
+Dialog_002:
+Text_002_001: .strn "哦…… 春日部竟然有了{End_11}"
+Text_002_002: .strn "这样的东西啊……{End_08}"
+
+.org 0x08FF0000
+PtrOfDialog_001:
+.word Text_001_001,Text_001_002,Text_001_003,Text_001_004
+.word Text_001_005,Text_001_006,Text_001_007,Text_001_008
+.word Text_001_009,Text_001_010,0
+
+PtrOfDialog_002:
+.word Text_002_001,Text_002_002,0
+
+.org 0x0849FFB8
+.word PtrOfDialog_001,PtrOfDialog_002
 
 /*
 .org 0x080C67EE
