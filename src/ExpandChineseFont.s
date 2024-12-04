@@ -1,4 +1,5 @@
 .org ExpandChineseFontAddress
+    pop r0-r7
  .importobj ".\build\RenderText.o"
 /* 
 CalculateCharmap:

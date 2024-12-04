@@ -19,6 +19,7 @@ E0 26 movs r6,0xe0 ->
 */
 
 .org 0x08009F3C
-    ldr R2,=ExpandChineseFontAddress
-    mov pc,R2
+    push r0-r7
+    ldr R0,=ExpandChineseFontAddress
+    mov pc,R0
 .pool
