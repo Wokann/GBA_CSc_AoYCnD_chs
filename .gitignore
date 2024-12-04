@@ -15,3 +15,5 @@
 build
 agbcc
 liux
+*.sym
+~$*.xlsx
