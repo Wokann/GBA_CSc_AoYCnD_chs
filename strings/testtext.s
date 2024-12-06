@@ -1,7 +1,7 @@
 ;蜡笔小新文本并非常规0xFF,0x00终止符，而是控制符结束。
 ;故不使用.str，因其在已设置终止符时会调用，不设置时也会默认为00填充
 
-.org 0x080C67EE
+.org 0x08FF0000
 Dialog_001:
 Text_001_001: .strn "在新之助他们居住的春日部！{End_16}"
 Text_001_002: .strn "新开设了一个{End_06}"
@@ -18,7 +18,7 @@ Dialog_002:
 Text_002_001: .strn "哦…… 春日部竟然有了{End_11}"
 Text_002_002: .strn "这样的东西啊……{End_08}"
 
-.org 0x08FF0000
+.align 4
 PtrOfDialog_001:
 .word Text_001_001,Text_001_002,Text_001_003,Text_001_004
 .word Text_001_005,Text_001_006,Text_001_007,Text_001_008

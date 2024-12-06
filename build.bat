@@ -1,6 +1,6 @@
  cd /d %~dp0
- C:\devkitPro\devkitARM\bin\arm-none-eabi-gcc.exe -mabi=aapcs -std=c99 -w -nostartfiles -nodefaultlibs -O2 -march=armv5te -mtune=arm946e-s -mthumb -I C:\devkitPro\libgba\include -c src\RenderText.c -o build\RenderText.o
- C:\devkitPro\devkitARM\bin\arm-none-eabi-gcc.exe -mabi=aapcs -std=c99 -w -nostartfiles -nodefaultlibs -O2 -march=armv5te -mtune=arm946e-s -mthumb -I C:\devkitPro\libgba\include -S src\RenderText.c -o build\RenderText.s
+ C:\devkitPro\devkitARM\bin\arm-none-eabi-gcc.exe -mabi=aapcs -std=c99 -w -nostartfiles -nodefaultlibs -O2 -march=armv5te -mtune=arm946e-s -mthumb -IC:\devkitPro\libgba\include -I.\include -c src\HackFunction\RenderText.c -o build\RenderText.o
+ C:\devkitPro\devkitARM\bin\arm-none-eabi-gcc.exe -mabi=aapcs -std=c99 -w -nostartfiles -nodefaultlibs -O2 -march=armv5te -mtune=arm946e-s -mthumb -IC:\devkitPro\libgba\include -I.\include -S src\HackFunction\RenderText.c -o build\RenderText.s
  C:\devkitPro\devkitARM\bin\arm-none-eabi-objcopy.exe -O binary build\RenderText.o build\RenderText.bin
 
 .\tools\armips\armips.exe main.s -sym CSc_AoYCnD_chs.sym

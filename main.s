@@ -9,15 +9,15 @@
 .include "./include/global.s"
 
 ;原址修改的部分
-.include "./src/HackInOrigin.s"
+.include "./src/HookInOrigin/renderText.s"
 
 ;中文相关函数
-.include "./src/ExpandChineseFont.s"
+.include "./src/HackFunction/ExpandChineseFont.s"
 
 ;中文字模
 .include "./graphic/graphic.s"
 
 ;测试文本
-.include "./data/testtext.s"
+.include "./strings/testtext.s"
 
 .close

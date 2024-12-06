@@ -1,78 +1,4 @@
-0x08009F9A
-E0 26 movs r6,0xe0
-->
-00 26 movs r6,0
-
-0x0848E92C
-34 7D 0A 08
-->
-00 00 00 09
-
-fontexpand
-.org 0x08009FC6
-ldr r0,=0x08FD0000
-mov pc,r0
-0x08FD0000
-.back 0x08009FD8
-
-fontexpand
-.org 0x08FD0000
-
-_calculatechar
-ldrh r2,[r7,0]         ;r2 = *r7(*v4)  ;文本编码
-lsrs r0,r2,8           ;r0 = hi(r2)
-cmp r0,3
-blt _normalcahr
-cmp r0,0xF
-ble _calchs
-cmp r0,0x40
-beq _calchs
-cmp r0,0x41
-beq _calchs
-cmp r0,0x43
-blt _normalcahr
-cmp r0,0x4F
-ble _calchs
-
-_calchs
-subs r0,r0,0x2
-cmp r0,0x3E
-blt _getchar
-subs r0,r0,0x30
-cmp r0,0x11
-blt _getchar
-subs r0,r0,0x2
-
-_getchar
-lsls r2,r0,8
-subs r0,r2,r0
-adds r0,r0,1
-ldrh r2,[r7,0]
-lsls r2,r2,0x18
-lsrs r2,r2,0x18
-adds r0,r0,r2
-b _wirte2ram
-
-_normalcahr
-ldrh r2,[r7,0]         ;r2 = *r7(*v4)  ;文本编码
-mov r0,r2              ;r0 = r2
-
-_wirte2ram
-lsls r0,r0,6
-adds r0,r6,r0        ;r0 = r2 * 0x40 + r6   ;字模地址
-str r0,[r5,0]        ;*0x040000D4 = r0
-str r4,[r5,4]        ;*0x040000D8 = r4   (内存地址)
-ldr r0,=0x80000020   ;r0 = 0x80000020
-str r0,[r5,8]        ;*0x040000DC = r0 = 0x80000020
-ldr r0,[r5,8]        ;r0 = 0x8000020
-adds r4,0x40         ;r4 = r4 + 0x40     (内存地址增加？) 
-
-_end
-ldr r0,=0x08009FD8
-mov pc,r0
-0x80000020
-0x08009FD8
-
+//汇编分析
 RAM:08009F3C F0 B5       PUSH            {R4-R7,LR}
 RAM:08009F3E 57 46       MOV             R7, R10
 RAM:08009F40 4E 46       MOV             R6, R9
@@ -199,183 +125,79 @@ RAM:0800A052 49 88       LDRH            R1, [R1,#2]
 RAM:0800A054 88 42       CMP             R0, R1
 RAM:0800A056 9C DB       BLT             loc_8009F92
 
-
-
-int __fastcall MayLoadFontgfx_08009F3C(int a1)
+//转C语言代码
+struct FontTileInfo
 {
-  char v2; // r1
-  int v3; // r2
-  _WORD *v4; // r7
-  int v5; // r4
-  unsigned int v6; // r9
-  int *Ram_040000D4_1; // r5
-  int Num_80000010_1; // r8
-  int v9; // r10
-  int v10; // r3
-  int v11; // r1
-  int v12; // r6
-  unsigned __int16 *v13; // r2
-  int v14; // r4
-  int v15; // r0
-  int v17; // [sp+1Ch] [bp-4h]
+    u16 unknown1;           //+0
+    u16 charCounts;         //+2
+    u32 *AddressOfCopyText; //+4
+    u32 *VramBase;          //+8
+    u32 *Wram2;             //+0xC
+    u16 TileCounts;         //+0x10
+    u8 NotChar;              //+0x12
+};
 
-  if ( *(_WORD *)(a1 + 2) )
-  {
-    v2 = *(_BYTE *)(a1 + 0x12);
-    if ( (v2 & 1) == 0 )
-    {
-      *(_BYTE *)(a1 + 0x12) = v2 | 1;
-      v3 = *(unsigned __int16 *)(a1 + 2);
-      v4 = (_WORD *)(*(_DWORD *)(a1 + 4) + 2 * v3 - 2);
-      v5 = *(_DWORD *)(a1 + 8) + 0x20 * (*(unsigned __int16 *)(a1 + 0x10) - (2 * (v3 - 1) + 1));
-      //从0x06008000起，计算当前要写入的字数，每个字占2个0x20 tile, 0x037F减去占用的tile数量 1、3、5、……
-      //即该字对应的tile内存存放地址
-      v6 = 0;
-      if ( *(_WORD *)(a1 + 2) )
-      {
-        Ram_040000D4_1 = Ram_040000D4;
-        Num_80000010_1 = Num_80000010;
-        v9 = Num_000001FF;
-        do
-        {
-          v10 = (unsigned __int16)*v4;
-          if ( *v4 )
-          {
-            v11 = (unsigned __int16)(v10 & 0x000) >> 9;   //0xe00改为0x0
-            v12 = *((_DWORD *)PtrOfAddOfFontGfx + v11);
-            v13 = *(unsigned __int16 **)(4 * (v10 & v9) + *((_DWORD *)PtrOfAddOfFontIndex + v11));
-            if ( *((_WORD *)PtrOfAddOfAddOfFontIndex + v11) )
-            {
-              *Ram_040000D4_1 = v12 + 0x20 * v13[1];
-              Ram_040000D4_1[1] = v5;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 = v5 + 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * v13[3];
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 += 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * *v13;
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 += 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * v13[2];
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v5 = v14 + 0x20;
-            }
-            else
-            {
-              hi = v10 >> 8;
-              lo = v10 & 0xFF;
-              if((hi >= 0x03 && hi <= 0x0F)||(hi >= 0x40 && hi <= 0x41)||(hi >= 0x43 && hi <= 0x4F))
-              {
-                hi -= 0x2;     //扣除0x02,0x03
-                if(hi >= 0x3E) //0x40-0x2
-                  hi -= 0x30;  //缩减0x10-0x40差距
-                if(hi >= 0x11) //0x43-0x2-0x30
-                  hi -= 0x2;   //扣除0x42,0x43
-
-                char = hi * 0xFF + lo + 1;
-              }
-              else
-                char = v10;
-
-              *Ram_040000D4_1 = v12 + (char << 6);// char * 0x40
-              Ram_040000D4_1[1] = v5;
-              Ram_040000D4_1[2] = Num_80000020;
-              v5 += 0x40;
-            }
-          }
-          --v4;
-          v15 = (v6 << 16) + 0x10000;
-          v6 = HIWORD(v15);
-        }
-        while ( v15 >> 16 < *(unsigned __int16 *)(a1 + 2) );
-      }
-    }
-  }
-  return v17;
-}
-
-===============================================================
-//原版
-int __fastcall MayLoadFontgfx_08009F3C(int a1)
+void RenderText_08009F3C(struct FontTileInfo *a1) 
 {
-  char v2; // r1
-  int v3; // r2
-  _WORD *v4; // r7
-  int v5; // r4
-  unsigned int v6; // r9
-  int *Ram_040000D4_1; // r5
-  int Num_80000010_1; // r8
-  int v9; // r10
-  int v10; // r3
-  int v11; // r1
-  int v12; // r6
-  unsigned __int16 *v13; // r2
-  int v14; // r4
-  int v15; // r0
-  int v17; // [sp+1Ch] [bp-4h]
+    u8 NotChar;
+    u16 *ptrOfCurChar;
+    u16 curChar,charCounts;
+    u32 dest,i;
 
-  if ( *(_WORD *)(a1 + 2) )
-  {
-    v2 = *(_BYTE *)(a1 + 0x12);
-    if ( (v2 & 1) == 0 )
+    if ( a1->charCounts ) 
     {
-      *(_BYTE *)(a1 + 0x12) = v2 | 1;
-      v3 = *(unsigned __int16 *)(a1 + 2);
-      v4 = (_WORD *)(*(_DWORD *)(a1 + 4) + 2 * v3 - 2);
-      v5 = *(_DWORD *)(a1 + 8) + 0x20 * (*(unsigned __int16 *)(a1 + 0x10) - (2 * (v3 - 1) + 1));
-      //从0x06008000起，计算当前要写入的字数，每个字占2个0x20 tile, 0x037F减去占用的tile数量 1、3、5、……
-      //即该字对应的tile内存存放地址
-      v6 = 0;
-      if ( *(_WORD *)(a1 + 2) )
-      {
-        Ram_040000D4_1 = Ram_040000D4;
-        Num_80000010_1 = Num_80000010;
-        v9 = Num_000001FF;
-        do
+        NotChar = a1->NotChar;
+        if ( (NotChar & 1) == 0 ) 
         {
-          v10 = (unsigned __int16)*v4;
-          if ( *v4 )
-          {
-            v11 = (unsigned __int16)(v10 & 0xE00) >> 9;
-            v12 = *((_DWORD *)PtrOfAddOfFontGfx + v11);
-            v13 = *(unsigned __int16 **)(4 * (v10 & v9) + *((_DWORD *)PtrOfAddOfFontIndex + v11));
-            if ( *((_WORD *)PtrOfAddOfAddOfFontIndex + v11) )
+            a1->NotChar = NotChar | 1; 
+            charCounts = a1->charCounts;
+            ptrOfCurChar = (u16 *)((u32)a1->AddressOfCopyText + (2 * (charCounts - 1)));
+            dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * (charCounts - 1) + 1));
+            //从0x06008000起，计算当前要写入的字数，每个字占2个0x20 tile, 0x037F减去占用的tile数量 1、3、5、……
+            //即该字对应的tile内存存放地址
+            i = 0;
+            
+            if ( a1->charCounts ) 
             {
-              *Ram_040000D4_1 = v12 + 0x20 * v13[1];
-              Ram_040000D4_1[1] = v5;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 = v5 + 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * v13[3];
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 += 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * *v13;
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v14 += 0x20;
-              *Ram_040000D4_1 = v12 + 0x20 * v13[2];
-              Ram_040000D4_1[1] = v14;
-              Ram_040000D4_1[2] = Num_80000010_1;
-              v5 = v14 + 0x20;
+                u32 v11;
+                do {
+                    curChar = *ptrOfCurChar;
+                    if (curChar) 
+                    {
+                        u32 v8 = (u16)(curChar & 0xE00) >> 9;
+                        u32 baseOffesetOfFont = *(u32 *)(0x848E92C + v8); //PtrOfAddOfFontGfx
+                        u16 *IndexOfFontGfx_Origin = *(u16 **)(4 * (curChar & 0x1FF) + *(u32 *)(0x848E930 + v8));//PtrOfAddOfFontIndex
+                        
+                        if ( *(u16 *)(0x848E934 + v8) )//PtrOfAddOfAddOfFontIndex
+                        {
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[1];
+                            *(u32 *) 0x40000D8 = dest;
+                            *(u32 *) 0x40000DC = 0x80000010;
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[3];
+                            *(u32 *) 0x40000D8 = dest + 0x20;
+                            *(u32 *) 0x40000DC = 0x80000010;
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[0];
+                            *(u32 *) 0x40000D8 = dest + 0x40;
+                            *(u32 *) 0x40000DC = 0x80000010;
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x20 * IndexOfFontGfx_Origin[2];
+                            *(u32 *) 0x40000D8 = dest + 0x60;
+                            *(u32 *) 0x40000DC = 0x80000010;
+                            dest += 0x80;
+                        } 
+                        else 
+                        {   
+                            *(u32 *) 0x40000D4 = baseOffesetOfFont + 0x40 * IndexOfFontGfx_Origin[0];
+                            *(u32 *) 0x40000D8 = dest;
+                            *(u32 *) 0x40000DC = 0x80000020;
+                            dest += 0x40;
+                        }
+                    }
+                    --ptrOfCurChar;
+                    v11 = (i << 16) + 0x10000;
+                    i = (u32)(v11 >> 16);  
+                } while ((v11 >> 16) < a1->charCounts);
             }
-            else
-            {
-              *Ram_040000D4_1 = v12 + (*v13 << 6);// *13 * 0x40
-              Ram_040000D4_1[1] = v5;
-              Ram_040000D4_1[2] = Num_80000020;
-              v5 += 0x40;
-            }
-          }
-          --v4;
-          v15 = (v6 << 16) + 0x10000;
-          v6 = HIWORD(v15);
         }
-        while ( v15 >> 16 < *(unsigned __int16 *)(a1 + 2) );
-      }
     }
-  }
-  return v17;
+    return;
 }
