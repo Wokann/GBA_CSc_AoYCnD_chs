@@ -17,3 +17,4 @@ agbcc
 liux
 *.sym
 ~$*.xlsx
+.vscode
