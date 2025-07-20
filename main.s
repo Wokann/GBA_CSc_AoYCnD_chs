@@ -18,6 +18,13 @@
 .include "./graphic/graphic.s"
 
 ;测试文本
-.include "./strings/testtext.s"
+ .importobj ".\build\strings\Menu.o"
+ .importobj ".\build\strings\NameList.o"
+ .importobj ".\build\strings\Tips.o"
+ .importobj ".\build\strings\GetItemNote.o"
+ .importobj ".\build\strings\MoviePlot.o"
+
+ .importobj ".\build\strings\PtrOfStrings.o"
+
 
 .close
