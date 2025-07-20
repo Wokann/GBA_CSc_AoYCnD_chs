@@ -29,6 +29,8 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
             charCounts = a1->charCounts;
             ptrOfCurChar = &((u16 *)a1->AddressOfCopyText)[(charCounts - 1)];
             dest = (u32)a1->VramBase + 0x20 * (a1->TileCounts - (2 * (charCounts - 1) + 1));
+            //从0x06008000起，计算当前要写入的字数，每个字占2个0x20 tile, 0x037F减去占用的tile数量 1、3、5、……
+            //即该字对应的tile内存存放地址
             i = 0;
             
             if ( a1->charCounts ) 
@@ -37,7 +39,7 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
                 {
                     curChar = *ptrOfCurChar;
                     if (IsChinese(curChar))
-                    {
+                    {   u32 IndexOfFontGfx,NewOffesetOfFont;
                         //汉字识别逻辑
                         u8 hi = curChar >> 8;
                         u8 lo = curChar & 0xFF;
@@ -50,8 +52,8 @@ void RenderText_08009F3C(struct FontTileInfo *a1)
                             hi -= 0x33;
                         else if (hi >= 0x44 && hi <= 0x4F)
                             hi -= 0x35;
-                        u32 IndexOfFontGfx = hi * 0xFF + lo - 1;
-                        u32 NewOffesetOfFont = 0x09000000;
+                        IndexOfFontGfx = hi * 0xFF + lo - 1;
+                        NewOffesetOfFont = 0x09000000;
                         REG_DMA3SAD = NewOffesetOfFont + 0x40 * IndexOfFontGfx;
                         REG_DMA3DAD = dest;
                         REG_DMA3CNT = 0x80000020;
