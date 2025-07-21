@@ -1,7 +1,7 @@
 #include "libgba\gba_types.h"
 #include "strings\NameList.h"
 
-//old 0x080B1B88-0x080B1D61
+// text 0x080B1B88 - 0x080B1D61
 u8 NameList_000[] = _("新之助{End}");
 u8 NameList_001[] = _("广志{End}");
 u8 NameList_002[] = _("美冴{End}");
