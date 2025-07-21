@@ -95,17 +95,21 @@ int load_charmap(const char* filename, Charmap* charmap) {
         char* code_str = line;  
         char* char_str = equals + 1;  
           
-        while (isspace(*code_str)) code_str++;  
-        while (isspace(*char_str)) char_str++;  
+        // 仅跳过 \t, \n, \r，但保留 ` `（空格）
+        while (*code_str == '\t' || *code_str == '\n' || *code_str == '\r') code_str++;  
+        while (*char_str == '\t' || *char_str == '\n' || *char_str == '\r') char_str++;  
           
+        // 移除行尾换行符  
         char* newline = strchr(char_str, '\n');  
         if (newline) *newline = '\0';  
         newline = strchr(char_str, '\r');  
         if (newline) *newline = '\0';  
           
+        // 解析十六进制编码  
         charmap->mappings[charmap->count].byte_count =   
             parse_hex_code(code_str, charmap->mappings[charmap->count].bytes);  
           
+        // 处理常量（如 {End}）或普通字符（如 "A"）  
         if (char_str[0] == '{' && char_str[strlen(char_str)-1] == '}') {  
             char_str[strlen(char_str)-1] = '\0';  
             char_str++;  
