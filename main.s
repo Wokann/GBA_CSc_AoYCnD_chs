@@ -10,6 +10,7 @@
 
 ;原址修改的部分
 .include "./src/HookInOrigin/renderText.s"
+.include "./src/HookInOrigin/GetStrings.s"
 
 ;中文相关函数
 .include "./src/HackFunction/ExpandChineseFont.s"
@@ -18,13 +19,12 @@
 .include "./graphic/graphic.s"
 
 ;测试文本
- .importobj ".\build\strings\Menu.o"
+ ;.importobj ".\build\strings\Menu.o"
+ .org 0x09070000
  .importobj ".\build\strings\NameList.o"
  .importobj ".\build\strings\Tips.o"
  .importobj ".\build\strings\GetItemNote.o"
  .importobj ".\build\strings\MoviePlot.o"
-
- .importobj ".\build\strings\PtrOfStrings.o"
 
 
 .close
