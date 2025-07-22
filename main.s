@@ -20,11 +20,21 @@
 
 ;测试文本
  ;.importobj ".\build\strings\Menu.o"
+  
  .org 0x09070000
  .importobj ".\build\strings\NameList.o"
  .importobj ".\build\strings\Tips.o"
  .importobj ".\build\strings\GetItemNote.o"
  .importobj ".\build\strings\MoviePlot.o"
+ 
 
+ .org 0x080B1B88
+ .incbin ".\build\strings\NameList_jp.bin"
+ .org 0x080B1D64
+ .incbin ".\build\strings\Tips_jp.bin"
+ .org 0x080BC678
+ .incbin ".\build\strings\GetItemNote_jp.bin"
+ .org 0x080BDEA0
+ .incbin ".\build\strings\MoviePlot_jp.bin"
 
 .close
